@@ -7,6 +7,7 @@ var session = require('express-session');
 var flash  = require('connect-flash');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var commentsRouter = require('./routes/comments');
 var sequelize = require('./models').sequelize;
 
 var app = express();
@@ -17,6 +18,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use(logger('dev'));
+app.use(express.static(path.join(__dirname, 'public')));
+
 // 정적인파일제공, 인자에 static디렉토리를 지정하면 된다.
 app.use(express.static(path.join(__dirname, 'public')));
 // BodyParser에 대한 부분.
@@ -36,6 +39,7 @@ app.use(session({
 app.use(flash());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/comments', commentsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
