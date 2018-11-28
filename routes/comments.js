@@ -1,15 +1,10 @@
 var express = require('express');
-var { User, Comment } = require('../models');
+var Comment = require('../schemas/comment');
 
 var router = express.Router();
 
-router.get('/:id', function(req, res, next) {
-    Comment.findAll({
-        include: {
-            model: User,
-            where: { id: req.params.id },
-        },
-    })
+router.get('/:id', function (req, res, next) {
+    Comment.find({ commenter: req.params.id }).populate('commenter')
         .then((comments) => {
             console.log(comments);
             res.json(comments);
@@ -20,13 +15,16 @@ router.get('/:id', function(req, res, next) {
         });
 });
 
-router.post('/', function(req, res, next) {
-    Comment.create({
+router.post('/', function (req, res, next) {
+    const comment = new Comment({
         commenter: req.body.id,
         comment: req.body.comment,
-    })
+    });
+    comment.save()
         .then((result) => {
-            console.log(result);
+            return Comment.populate(result, { path: 'commenter' });
+        })
+        .then((result) => {
             res.status(201).json(result);
         })
         .catch((err) => {
@@ -35,8 +33,8 @@ router.post('/', function(req, res, next) {
         });
 });
 
-router.patch('/:id', function(req, res, next) {
-    Comment.update({ comment: req.body.comment }, { where: { id: req.params.id } })
+router.patch('/:id', function (req, res, next) {
+    Comment.update({ _id: req.params.id }, { comment: req.body.comment })
         .then((result) => {
             res.json(result);
         })
@@ -46,8 +44,8 @@ router.patch('/:id', function(req, res, next) {
         });
 });
 
-router.delete('/:id', function(req, res, next) {
-    Comment.destroy({ where: { id: req.params.id } })
+router.delete('/:id', function (req, res, next) {
+    Comment.remove({ _id: req.params.id })
         .then((result) => {
             res.json(result);
         })

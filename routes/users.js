@@ -1,11 +1,10 @@
 var express = require('express');
-var User = require('../models').User;
+var User = require('../schemas').User;
 
 var router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-    User.findAll()
+router.get('/', function (req, res, next) {
+    User.find({})
         .then((users) => {
             res.json(users);
         })
@@ -16,11 +15,12 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/', function (req, res, next) {
-    User.create({
+    const user = new User({
         name: req.body.name,
         age: req.body.age,
         married: req.body.married,
-    })
+    });
+    user.save()
         .then((result) => {
             console.log(result);
             res.status(201).json(result);
@@ -29,16 +29,6 @@ router.post('/', function (req, res, next) {
             console.error(err);
             next(err);
         });
-});
-
-router.get('/flash', function (req, res) {
-    req.session.message = '세션메세지';
-    req.flash('message', 'flash메세지');
-    res.redirect('/users/flash/result');
-});
-
-router.get('/users/flash/result', function (req, res) {
-    res.send(`${req.session.message} ${req.flash('message')}`);
 });
 
 module.exports = router;
